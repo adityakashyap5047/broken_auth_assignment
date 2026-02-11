@@ -15,7 +15,7 @@ const otpStore = {};
 // Middleware
 app.use(requestLogger);
 app.use(express.json());
-
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.json({
@@ -49,8 +49,7 @@ app.post("/auth/login", (req, res) => {
     // Store OTP
     otpStore[loginSessionId] = otp;
 
-    console.log(`[OTP] Session ${loginSessionId} generated`);
-
+    console.log(`${otp} Session ${loginSessionId} generated`);
     return res.status(200).json({
       message: "OTP sent",
       loginSessionId,
@@ -83,7 +82,7 @@ app.post("/auth/verify-otp", (req, res) => {
       return res.status(401).json({ error: "Session expired" });
     }
 
-    if (parseInt(otp) !== otpStore[loginSessionId]) {
+    if (Number(otp) !== Number(otpStore[loginSessionId])) {
       return res.status(401).json({ error: "Invalid OTP" });
     }
 
@@ -109,15 +108,15 @@ app.post("/auth/verify-otp", (req, res) => {
 
 app.post("/auth/token", (req, res) => {
   try {
-    const token = req.headers.authorization;
+    const sessionId = req.cookies.session_token;
 
-    if (!token) {
+    if (!sessionId) {
       return res
         .status(401)
         .json({ error: "Unauthorized - valid session required" });
     }
 
-    const session = loginSessions[token.replace("Bearer ", "")];
+    const session = loginSessions[sessionId];
 
     if (!session) {
       return res.status(401).json({ error: "Invalid session" });
@@ -129,12 +128,10 @@ app.post("/auth/token", (req, res) => {
     const accessToken = jwt.sign(
       {
         email: session.email,
-        sessionId: token,
+        sessionId: sessionId,
       },
       secret,
-      {
-        expiresIn: "15m",
-      }
+      { expiresIn: "15m" }
     );
 
     return res.status(200).json({

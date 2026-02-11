@@ -1,0 +1,15 @@
+# Login
+$ curl -X POST http://localhost:3000/auth/login -H "Content-Type: application/json" -d '{"email":"adityakumar247365@gmail.com","password":"aditya@123"}'
+{"message":"OTP sent","loginSessionId":"p2whp"}
+
+# Verify OTP
+$ curl -c cookies.txt -X POST http://localhost:3000/auth/verify-otp   -H "Content-Type: application/json"   -d '{"loginSessionId":"p2whp","otp":"492543"}'
+{"message":"OTP verified","sessionId":"p2whp"}
+
+# Get Token
+$ curl -b cookies.txt -X POST http://localhost:3000/auth/token
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkaXR5YWt1bWFyMjQ3MzY1QGdtYWlsLmNvbSIsInNlc3Npb25JZCI6InAyd2hwIiwiaWF0IjoxNzcwODMxMzk1LCJleHAiOjE3NzA4MzIyOTV9.IPSjT_Tg1WsESAOAIEty4igHImyWPJYizWXAyA-8JO0","expires_in":900}
+
+# Access Protected Route
+$ curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkaXR5YWt1bWFyMjQ3MzY1QGdtYWlsLmNvbSIsInNlc3Npb25JZCI6InAyd2hwIiwiaWF0IjoxNzcwODMxMzk1LCJleHAiOjE3NzA4MzIyOTV9.IPSjT_Tg1WsESAOAIEty4igHImyWPJYizWXAyA-8JO0" http://localhost:3000/protected
+{"message":"Access granted","user":{"email":"adityakumar247365@gmail.com","sessionId":"p2whp","iat":1770831395,"exp":1770832295},"success_flag":"FLAG-YWRpdHlha3VtYXIyNDczNjVAZ21haWwuY29tX0NPTVBMRVRFRF9BU1NJR05NRU5U"}
